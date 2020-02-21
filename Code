@@ -1,0 +1,193 @@
+### The code we use for the project####
+loc<-"http://archive.ics.uci.edu/ml/machine-learning-databases/flags/flag.data"
+flags<-read.csv(url(loc),header=F,)
+colnames(flags)<-c("Name","landmass","zone","area","population","language","religion","bars","stripes","colours","red","green","blue","gold","white","black","orange","mainhue","circles","crosses","saltires","quarters","sunstars","crescent","triangle","icon","animate","text","topleft","botright")
+flags
+
+flags$religionCLASS <- factor(flags$religion)
+
+# combine religions 0 and 1
+levels(flags$religionCLASS) <- c("1","1","2","3","4","5","6", "7")
+
+attach(flags)
+library(faraway)
+library(nnet)
+library(rpart)
+library(randomForest)
+library(ipred)
+set.seed(316)
+
+##randomforest .1 cp
+Pred1<-rep(0,194)
+for (i in 1:194){
+forestmodel1<-randomForest(religionCLASS~bars+stripes+colours+red+green+blue+gold+white+black+orange+mainhue+circles+crosses+saltires+quarters+sunstars+crescent+triangle+icon+animate+text+topleft+botright, data=flags[-i,], method="class",cp =.1)
+Pred1[i]=predict(forestmodel1,newdata=flags[i,],type ="class")
+}
+tbl <- table(Pred1,flags$religionCLASS)
+tbl
+RandomForest.1cp<-sum(diag(tbl)) / dim(flags)[1]
+
+## randomforest .01 cp
+Pred2<-rep(0,194)
+for (i in 1:194){
+forestmodel2<-randomForest(religionCLASS~bars+stripes+colours+red+green+blue+gold+white+black+orange+mainhue+circles+crosses+saltires+quarters+sunstars+crescent+triangle+icon+animate+text+topleft+botright, data=flags[-i,], method="class",cp =.01)
+Pred2[i]=predict(forestmodel2,newdata=flags[i,],type ="class")
+}
+tbl <- table(Pred2,flags$religionCLASS)
+tbl
+RandomForest.01cp<-sum(diag(tbl)) / dim(flags)[1]
+
+## RandomForest .001 cp
+Pred3<-rep(0,194)
+for (i in 1:194){
+forestmodel3<-randomForest(religionCLASS~bars+stripes+colours+red+green+blue+gold+white+black+orange+mainhue+circles+crosses+saltires+quarters+sunstars+crescent+triangle+icon+animate+text+topleft+botright, data=flags[-i,], method="class",cp =.001)
+Pred3[i]=predict(forestmodel3,newdata=flags[i,],type ="class")
+}
+tbl <- table(Pred3,flags$religionCLASS)
+tbl
+RandomForest.001cp<-sum(diag(tbl)) / dim(flags)[1]
+
+## RandomForest .5 cp
+Pred12<-rep(0,194)
+for (i in 1:194){
+forestmodel12<-randomForest(religionCLASS~bars+stripes+colours+red+green+blue+gold+white+black+orange+mainhue+circles+crosses+saltires+quarters+sunstars+crescent+triangle+icon+animate+text+topleft+botright, data=flags[-i,], method="class",cp =.5)
+Pred12[i]=predict(forestmodel12,newdata=flags[i,],type ="class")
+}
+tbl <- table(Pred12,flags$religionCLASS)
+tbl
+RandomForest.5cp<-sum(diag(tbl)) / dim(flags)[1]
+RandomForest.5cp
+
+## Baggin .1 cp
+Pred4<-rep(0,194)
+for (i in 1:194){
+Baggingmodels4<-bagging(religionCLASS~bars+stripes+colours+red+green+blue+gold+white+black+orange+mainhue+circles+crosses+saltires+quarters+sunstars+crescent+triangle+icon+animate+text+topleft+botright, data=flags[-i,], method="class", cp=.1)
+Pred4[i]=as.character(predict(Baggingmodels4,newdata=flags[i,],type ="class"))
+}
+tbl <- table(Pred4,flags$religionCLASS[1:194])
+tbl
+Bagging.1cp<-sum(diag(tbl)) / dim(flags)[1]
+Bagging.1cp
+
+## Bagging .01 cp
+Pred5<-rep(0,194)
+for (i in 1:194){
+Baggingmodels5<-bagging(religionCLASS~bars+stripes+colours+red+green+blue+gold+white+black+orange+mainhue+circles+crosses+saltires+quarters+sunstars+crescent+triangle+icon+animate+text+topleft+botright, data=flags[-i,], method="class",cp =.01)
+Pred5[i]=as.character(predict(Baggingmodels5,newdata=flags[i,],type ="class"))
+}
+tbl <- table(Pred5,flags$religionCLASS)
+tbl
+Bagging.01cp<-sum(diag(tbl)) / dim(flags)[1]
+
+## Bagging .001
+Pred6<-rep(0,194)
+for (i in 1:194){
+Baggingmodels6<-bagging(religionCLASS~bars+stripes+colours+red+green+blue+gold+white+black+orange+mainhue+circles+crosses+saltires+quarters+sunstars+crescent+triangle+icon+animate+text+topleft+botright, data=flags[-i,], method="class",cp =.001)
+Pred6[i]=as.character(predict(Baggingmodels6,newdata=flags[i,],type ="class"))
+}
+tbl <- table(Pred6,flags$religionCLASS)
+tbl
+Bagging.001cp<-sum(diag(tbl)) / dim(flags)[1]
+
+## Bagging .5cp
+Pred7<-rep(0,194)
+for (i in 1:194){
+Baggingmodels7<-bagging(religionCLASS~bars+stripes+colours+red+green+blue+gold+white+black+orange+mainhue+circles+crosses+saltires+quarters+sunstars+crescent+triangle+icon+animate+text+topleft+botright, data=flags[-i,], method="class",cp =.5)
+Pred7[i]=as.character(predict(Baggingmodels7,newdata=flags[i,],type ="class"))
+}
+tbl <- table(Pred7,flags$religionCLASS)
+tbl
+Bagging.5cp<-sum(diag(tbl)) / dim(flags)[1]
+
+## Tree .1
+Pred8<-rep(0,194)
+for (i in 1:194){
+Tree8<-rpart(religionCLASS~bars+stripes+colours+red+green+blue+gold+white+black+orange+mainhue+circles+crosses+saltires+quarters+sunstars+crescent+triangle+icon+animate+text+topleft+botright, data=flags[-i,], method="class",cp =.1)
+Pred8[i]=as.character(predict(Tree8,newdata=flags[i,],type ="class"))
+}
+tbl <- table(Pred8,flags$religionCLASS)
+tbl
+Tree.1cp<-sum(diag(tbl)) / dim(flags)[1]
+
+## Tree .01
+Pred9<-rep(0,194)
+for (i in 1:194){
+Tree9<-rpart(religionCLASS~bars+stripes+colours+red+green+blue+gold+white+black+orange+mainhue+circles+crosses+saltires+quarters+sunstars+crescent+triangle+icon+animate+text+topleft+botright, data=flags[-i,], method="class",cp =.01)
+Pred9[i]=as.character(predict(Tree9,newdata=flags[i,],type ="class"))
+}
+tbl <- table(Pred9,flags$religionCLASS)
+tbl
+Tree.01cp<-sum(diag(tbl)) / dim(flags)[1]
+
+
+## Tree .001
+Pred10<-rep(0,194)
+for (i in 1:194){
+Tree10<-rpart(religionCLASS~bars+stripes+colours+red+green+blue+gold+white+black+orange+mainhue+circles+crosses+saltires+quarters+sunstars+crescent+triangle+icon+animate+text+topleft+botright, data=flags[-i,], method="class",cp =.001)
+Pred10[i]=as.character(predict(Tree10,newdata=flags[i,],type ="class"))
+}
+tbl <- table(Pred10,flags$religionCLASS)
+tbl
+Tree.001cp<-sum(diag(tbl)) / dim(flags)[1]
+
+## Tree .5 
+Pred11<-rep(0,194)
+for (i in 1:194){
+Tree11<-rpart(religionCLASS~bars+stripes+colours+red+green+blue+gold+white+black+orange+mainhue+circles+crosses+saltires+quarters+sunstars+crescent+triangle+icon+animate+text+topleft+botright, data=flags[-i,], method="class",cp =.5)
+Pred11[i]=as.character(predict(Tree11,newdata=flags[i,],type ="class"))
+}
+tbl <- table(Pred11,flags$religionCLASS)
+tbl
+Tree.5cp<-sum(diag(tbl)) / dim(flags)[1]
+# Try a multinomial regression 
+ set.seed(666) 
+Test<-sample(1:194,50) 
+flags$religionCLASS <- factor(flags$religion) 
+ 
+library(nnet) 
+ 
+multiModel <- multinom(religionCLASS~bars+stripes+colours+red+green+blue+gold+white+black+orange+mainhue+circles+crosses+saltires+quarters+sunstars+crescent+triangle+icon+animate+text+topleft+botright, data=flags[-Test,], method="class") 
+multiPreds <- predict(multiModel,newdata=flags[Test,],type="class") 
+tbl <- table(multiPreds,flags$religionCLASS[Test]) 
+tbl 
+MMULT <-sum(diag(tbl)) / length(Test) 
+# Multinomial model gives us a 30% prediction rate 
+> ##Results ## Results using CER 
+> RandomForest.1cp
+[1] 0.5721649
+> 
+> RandomForest.01cp
+[1] 0.5463918
+> 
+> RandomForest.001cp
+[1] 0.5618557
+> 
+> RandomForest.5cp
+[1] 0.5670103
+> 
+> Bagging.1cp
+[1] 0.5515464
+> 
+> Bagging.01cp
+[1] 0.5515464
+> 
+> Bagging.001cp
+[1] 0.5206186
+> 
+> Bagging.5cp
+[1] 0.5515464
+> 
+> Tree.1cp
+[1] 0.4587629
+> 
+> Tree.01cp
+[1] 0.5412371
+> 
+> Tree.001cp
+[1] 0.5257732
+> 
+> Tree.5cp
+[1] 0.5154639
+> 
+MMULT model 
+.3 
